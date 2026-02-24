@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sistema Solar 3D Ajustado</title>
+<style>
+body { margin:0; overflow:hidden; background:black; }
+#info{
+  position:absolute; top:10px; left:10px;
+  color:white; background:rgba(0,0,0,0.6);
+  padding:10px; border-radius:6px; font-family:Arial;
+  z-index:2;
+}
+#menuPlanetas{
+  position:absolute; top:50px; left:10px;
+  color:white; background:rgba(0,0,0,0.6);
+  padding:10px; border-radius:6px; font-family:Arial;
+  z-index:2;
+}
+button { margin:3px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<div id="info">WASD = mover, Q/E = bajar/subir, Ratón = mirar.</div>
+<div id="menuPlanetas">
+  <button onclick="irSistemaSolar()">Sistema Solar Completo</button>
+  <button onclick="irPlaneta(mercurio)">Mercurio</button>
+  <button onclick="irPlaneta(venus)">Venus</button>
+  <button onclick="irPlaneta(tierra)">Tierra</button>
+  <button onclick="irPlaneta(marte)">Marte</button>
+  <button onclick="irPlaneta(jupiter)">Júpiter</button>
+  <button onclick="irPlaneta(saturno)">Saturno</button>
+  <button onclick="irPlaneta(urano)">Urano</button>
+  <button onclick="irPlaneta(neptuno)">Neptuno</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+
+<script>
+// Escena y cámara
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 20000);
+camera.position.set(0,200,800);
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Texturas
+const loader = new THREE.TextureLoader();
+const textures = {
+  Sol: "https://i.postimg.cc/zGW5FLW0/sol.png",
+  Mercurio: "https://i.postimg.cc/jSqQzfBG/mercurio.png",
+  Venus: "https://i.postimg.cc/Znh60vrX/venus.png",
+  Tierra: "https://i.postimg.cc/wTp1NdS6/image.png",
+  Marte: "https://i.postimg.cc/x8S1LKp4/marte-textura.png",
+  Júpiter: "https://i.postimg.cc/W3mvLxSq/jupiter_textura.png",
+  Saturno: "https://i.postimg.cc/T1Wn3qLQ/saturno.png",
+  Urano: "https://i.postimg.cc/dVFNgDp8/urano.png",
+  Neptuno: "https://i.postimg.cc/HxFBzLb0/neptuno.png",
+  LunaTierra: "https://i.postimg.cc/7hfrGbwg/luna.png",
+  Fobos: "https://i.postimg.cc/7hfrGbwg/luna.png",
+  Deimos: "https://i.postimg.cc/placeholder-deimos.png",
+  LunaJupiter: "https://i.postimg.cc/7hfrGbwg/luna.png"
+};
+
+// Luz del Sol
+const sunLight = new THREE.PointLight(0xffffff, 3);
+sunLight.position.set(0,0,0);
+scene.add(sunLight);
+
+// Sol visual
+const sunGeo = new THREE.SphereGeometry(50,64,64);
+const sunMat = new THREE.MeshBasicMaterial({ map: loader.load(textures.Sol) });
+const sun = new THREE.Mesh(sunGeo, sunMat);
+scene.add(sun);
+
+// Estrellas
+(function crearEstrellas(){
+  const g = new THREE.BufferGeometry();
+  const v = [];
+  for(let i=0;i<50000;i++){
+    v.push(THREE.MathUtils.randFloatSpread(20000));
+    v.push(THREE.MathUtils.randFloatSpread(20000));
+    v.push(THREE.MathUtils.randFloatSpread(20000));
+  }
+  g.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
+  scene.add(new THREE.Points(g,new THREE.PointsMaterial({size:1,color:0xffffff})));
+})();
+
+// Función para crear planetas
+function crearPlaneta(nombre, opciones){
+  const geo = new THREE.SphereGeometry(opciones.radio,32,32);
+  const mat = textures[nombre]
+    ? new THREE.MeshStandardMaterial({ map: loader.load(textures[nombre]) })
+    : new THREE.MeshStandardMaterial({ color: opciones.color });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.name = nombre;
+  mesh.userData = {
+    distancia: opciones.distancia,
+    angulo: Math.random()*Math.PI*2,
+    velocidadOrbita: opciones.velOrb,
+    velocidadRotacion: opciones.velRot
+  };
+  scene.add(mesh);
+  return mesh;
+}
+
+// Planetas más cercanos y órbitas un poco más rápidas
+const mercurio = crearPlaneta("Mercurio", { color:0x909090, radio:4, distancia:120, velOrb:0.00005, velRot:0.0005 });
+const venus    = crearPlaneta("Venus",    { color:0xffcc99, radio:6, distancia:180, velOrb:0.00004, velRot:0.0008 });
+const tierra   = crearPlaneta("Tierra",   { color:0x00ff00, radio:8, distancia:250, velOrb:0.000035, velRot:0.001 });
+const marte    = crearPlaneta("Marte",    { color:0xff0000, radio:5, distancia:320, velOrb:0.00003, velRot:0.0009 });
+const jupiter  = crearPlaneta("Júpiter",  { color:0xff9966, radio:16, distancia:400, velOrb:0.00002, velRot:0.002 });
+const saturno  = crearPlaneta("Saturno",  { color:0xffcc66, radio:14, distancia:470, velOrb:0.000015, velRot:0.0015 });
+const urano    = crearPlaneta("Urano",    { color:0x66ccff, radio:12, distancia:520, velOrb:0.000012, velRot:0.0012 });
+const neptuno  = crearPlaneta("Neptuno",  { color:0x3366ff, radio:12, distancia:580, velOrb:0.00001, velRot:0.001 });
+
+// Lunas
+function crearLuna(planet,nombre,color,radio,dist,vel){
+  const l = new THREE.Mesh(
+    new THREE.SphereGeometry(radio,16,16),
+    new THREE.MeshStandardMaterial({ map: loader.load(textures[nombre]) })
+  );
+  l.userData = { orbita:planet, distancia:dist, velocidad:vel, angulo: Math.random()*Math.PI*2 };
+  scene.add(l);
+  return l;
+}
+
+const lunaTierra = crearLuna(tierra,"LunaTierra",0xffffff,1.8,12,0.01);
+const fobos = crearLuna(marte,"Fobos",0xaaaaaa,1.2,8,0.015);
+const deimos = crearLuna(marte,"Deimos",0xcccccc,0.8,12,0.007);
+const lunaJupiter = crearLuna(jupiter,"LunaJupiter",0x888888,3,25,0.003);
+
+// Órbitas visuales finas
+function crearOrbita(distancia){
+  const geo = new THREE.RingGeometry(distancia-0.5, distancia+0.5, 64);
+  const mat = new THREE.MeshBasicMaterial({ color:0xffffff, side:THREE.DoubleSide, opacity:0.2, transparent:true });
+  const ring = new THREE.Mesh(geo, mat);
+  ring.rotation.x = Math.PI/2;
+  scene.add(ring);
+  return ring;
+}
+const orbitas = [
+  crearOrbita(120), crearOrbita(180), crearOrbita(250), crearOrbita(320),
+  crearOrbita(400), crearOrbita(470), crearOrbita(520), crearOrbita(580)
+];
+
+// Controles
+const controls = new THREE.PointerLockControls(camera, document.body);
+document.body.addEventListener('click', ()=>controls.lock());
+const move = { f:false, b:false, l:false, r:false, up:false, down:false };
+document.addEventListener('keydown',(e)=>{
+  if(["KeyW","ArrowUp"].includes(e.code)) move.f=true;
+  if(["KeyS","ArrowDown"].includes(e.code)) move.b=true;
+  if(["KeyA","ArrowLeft"].includes(e.code)) move.l=true;
+  if(["KeyD","ArrowRight"].includes(e.code)) move.r=true;
+  if(["Space","KeyE"].includes(e.code)) move.up=true;
+  if(["ShiftLeft","KeyQ"].includes(e.code)) move.down=true;
+});
+document.addEventListener('keyup',(e)=>{
+  if(["KeyW","ArrowUp"].includes(e.code)) move.f=false;
+  if(["KeyS","ArrowDown"].includes(e.code)) move.b=false;
+  if(["KeyA","ArrowLeft"].includes(e.code)) move.l=false;
+  if(["KeyD","ArrowRight"].includes(e.code)) move.r=false;
+  if(["Space","KeyE"].includes(e.code)) move.up=false;
+  if(["ShiftLeft","KeyQ"].includes(e.code)) move.down=false;
+});
+
+// Funciones de menú
+function irPlaneta(planeta){
+  camera.position.set(planeta.position.x,planeta.position.y+10,planeta.position.z+planeta.userData.distancia*0.5);
+}
+function irSistemaSolar(){
+  camera.position.set(0,200,800);
+}
+
+// Animación
+function animate(){
+  requestAnimationFrame(animate);
+
+  const speed = 5;
+  if(move.f) controls.moveForward(speed);
+  if(move.b) controls.moveForward(-speed);
+  if(move.l) controls.moveRight(-speed);
+  if(move.r) controls.moveRight(speed);
+  if(move.up) camera.position.y += speed;
+  if(move.down) camera.position.y -= speed;
+
+  // Órbitas y rotaciones
+  [mercurio,venus,tierra,marte,jupiter,saturno,urano,neptuno].forEach(p=>{
+    p.userData.angulo += p.userData.velocidadOrbita;
+    p.position.x = Math.cos(p.userData.angulo)*p.userData.distancia;
+    p.position.z = Math.sin(p.userData.angulo)*p.userData.distancia;
+    p.rotation.y += p.userData.velocidadRotacion;
+  });
+
+  [lunaTierra,fobos,deimos,lunaJupiter].forEach(l=>{
+    l.userData.angulo += l.userData.velocidad;
+    const o = l.userData.orbita.position;
+    l.position.x = o.x + Math.cos(l.userData.angulo)*l.userData.distancia;
+    l.position.z = o.z + Math.sin(l.userData.angulo)*l.userData.distancia;
+  });
+
+  renderer.render(scene,camera);
+}
+animate();
+
+// Resize
+window.addEventListener('resize', ()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
