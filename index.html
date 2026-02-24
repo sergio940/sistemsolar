@@ -2,9 +2,10 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Sistema Solar 3D</title>
+<title>Explorador del Sistema Solar</title>
 
 <style>
+
 body{
 margin:0;
 overflow:hidden;
@@ -12,41 +13,51 @@ background:black;
 font-family:Arial;
 }
 
-#ui{
+#panel{
 position:absolute;
 top:10px;
 left:10px;
-background:rgba(0,0,0,0.6);
+background:rgba(0,0,0,0.65);
 color:white;
-padding:10px;
-border-radius:8px;
-z-index:10;
+padding:12px;
+border-radius:10px;
+z-index:5;
 }
 
 button{
 margin:2px;
 cursor:pointer;
 }
+
 </style>
 </head>
 
 <body>
 
-<div id="ui">
-WASD mover<br>
-Q / E bajar subir<br>
-Click activar cámara<br><br>
+<div id="panel">
 
-<button onclick="verSistema()">Sistema completo</button><br>
-<button onclick="verPlaneta(mercurio)">Mercurio</button>
-<button onclick="verPlaneta(venus)">Venus</button>
-<button onclick="verPlaneta(tierra)">Tierra</button>
-<button onclick="verPlaneta(marte)">Marte</button>
-<button onclick="verPlaneta(jupiter)">Jupiter</button>
-<button onclick="verPlaneta(saturno)">Saturno</button>
-<button onclick="verPlaneta(urano)">Urano</button>
-<button onclick="verPlaneta(neptuno)">Neptuno</button>
-<button onclick="verPlaneta(pluton)">Pluton</button>
+Explorador espacial<br>
+Click activar cámara<br>
+WASD mover<br>
+Q/E subir bajar<br><br>
+
+<button onclick="verSistema()">Sistema</button>
+
+<button onclick="viajar(mercurio)">Mercurio</button>
+<button onclick="viajar(venus)">Venus</button>
+<button onclick="viajar(tierra)">Tierra</button>
+<button onclick="viajar(marte)">Marte</button>
+<button onclick="viajar(jupiter)">Jupiter</button>
+<button onclick="viajar(saturno)">Saturno</button>
+<button onclick="viajar(urano)">Urano</button>
+<button onclick="viajar(neptuno)">Neptuno</button>
+<button onclick="viajar(pluton)">Pluton</button>
+
+<br><br>
+
+<button onclick="aterrizar()">Aterrizar</button>
+<button onclick="despegar()">Despegar</button>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -60,7 +71,7 @@ const camera = new THREE.PerspectiveCamera(
 75,
 window.innerWidth/window.innerHeight,
 0.1,
-50000
+100000
 );
 
 camera.position.set(0,300,900);
@@ -71,69 +82,40 @@ document.body.appendChild(renderer.domElement);
 
 const loader = new THREE.TextureLoader();
 
-const textures = {
+const tex = {
 
 sun:"https://i.postimg.cc/zGW5FLW0/sol.png",
-
 mercury:"https://i.postimg.cc/jSqQzfBG/mercurio.png",
 venus:"https://i.postimg.cc/Znh60vrX/venus.png",
-
 earth:"https://i.postimg.cc/wTp1NdS6/image.png",
 mars:"https://i.postimg.cc/x8S1LKp4/marte-textura.png",
-
 jupiter:"https://i.postimg.cc/W3mvLxSq/jupiter_textura.png",
 saturn:"https://i.postimg.cc/T1Wn3qLQ/saturno.png",
-
 uranus:"https://i.postimg.cc/dVFNgDp8/urano.png",
 neptune:"https://i.postimg.cc/HxFBzLb0/neptuno.png",
-
-pluto:"https://i.postimg.cc/sDBswhc5/pluton.png",
+pluto:"https://i.postimg.cc/fL9JX9s3/pluton.png",
 
 moon:"https://i.postimg.cc/7hfrGbwg/luna.png",
 rings:"https://i.postimg.cc/yYhKz6LX/saturn-rings.png"
+
 };
 
 const light = new THREE.PointLight(0xffffff,3);
 scene.add(light);
 
-const sunGeo = new THREE.SphereGeometry(60,64,64);
-const sunMat = new THREE.MeshBasicMaterial({map:loader.load(textures.sun)});
-const sun = new THREE.Mesh(sunGeo,sunMat);
+const sun = new THREE.Mesh(
+new THREE.SphereGeometry(60,64,64),
+new THREE.MeshBasicMaterial({map:loader.load(tex.sun)})
+);
+
 scene.add(sun);
 
-function estrellas(){
+function crearPlaneta(texture,size,dist,orb,rot){
 
-const g = new THREE.BufferGeometry();
-const v=[];
-
-for(let i=0;i<80000;i++){
-
-v.push(THREE.MathUtils.randFloatSpread(30000));
-v.push(THREE.MathUtils.randFloatSpread(30000));
-v.push(THREE.MathUtils.randFloatSpread(30000));
-
-}
-
-g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));
-
-const mat=new THREE.PointsMaterial({size:1});
-const star=new THREE.Points(g,mat);
-
-scene.add(star);
-
-}
-
-estrellas();
-
-function crearPlaneta(nombre,tex,radio,dist,orb,rot){
-
-const geo=new THREE.SphereGeometry(radio,32,32);
-
-const mat=new THREE.MeshStandardMaterial({
-map:loader.load(tex)
-});
-
-const mesh=new THREE.Mesh(geo,mat);
+const mesh = new THREE.Mesh(
+new THREE.SphereGeometry(size,32,32),
+new THREE.MeshStandardMaterial({map:loader.load(texture)})
+);
 
 mesh.userData={
 dist:dist,
@@ -148,32 +130,27 @@ return mesh;
 
 }
 
-const mercurio=crearPlaneta("mercurio",textures.mercury,4,140,0.00008,0.002);
-const venus=crearPlaneta("venus",textures.venus,6,200,0.00007,0.002);
-const tierra=crearPlaneta("tierra",textures.earth,8,270,0.00006,0.004);
-const marte=crearPlaneta("marte",textures.mars,5,340,0.00005,0.003);
+const mercurio=crearPlaneta(tex.mercury,4,140,0.00008,0.002);
+const venus=crearPlaneta(tex.venus,6,200,0.00007,0.002);
+const tierra=crearPlaneta(tex.earth,8,270,0.00006,0.004);
+const marte=crearPlaneta(tex.mars,5,340,0.00005,0.003);
+const jupiter=crearPlaneta(tex.jupiter,20,460,0.00003,0.006);
+const saturno=crearPlaneta(tex.saturn,18,560,0.000025,0.005);
+const urano=crearPlaneta(tex.uranus,14,660,0.00002,0.004);
+const neptuno=crearPlaneta(tex.neptune,14,760,0.000018,0.004);
+const pluton=crearPlaneta(tex.pluto,3,900,0.000012,0.002);
 
-const jupiter=crearPlaneta("jupiter",textures.jupiter,20,460,0.00003,0.006);
-const saturno=crearPlaneta("saturno",textures.saturn,18,560,0.000025,0.005);
+function crearAnillos(){
 
-const urano=crearPlaneta("urano",textures.uranus,14,660,0.00002,0.004);
-const neptuno=crearPlaneta("neptuno",textures.neptune,14,760,0.000018,0.004);
+const geo = new THREE.RingGeometry(26,40,128);
 
-const pluton=crearPlaneta("pluton",textures.pluto,3,900,0.000012,0.002);
-
-function anillosSaturno(){
-
-const tex=loader.load(textures.rings);
-
-const geo=new THREE.RingGeometry(26,40,64);
-
-const mat=new THREE.MeshStandardMaterial({
-map:tex,
+const mat = new THREE.MeshStandardMaterial({
+map:loader.load(tex.rings),
 side:THREE.DoubleSide,
 transparent:true
 });
 
-const ring=new THREE.Mesh(geo,mat);
+const ring = new THREE.Mesh(geo,mat);
 
 ring.rotation.x=Math.PI/2;
 
@@ -181,20 +158,20 @@ saturno.add(ring);
 
 }
 
-anillosSaturno();
+crearAnillos();
 
-function crearLuna(planeta,dist,vel,radio){
+function crearLuna(planeta,dist,vel,size){
 
-const geo=new THREE.SphereGeometry(radio,16,16);
-const mat=new THREE.MeshStandardMaterial({map:loader.load(textures.moon)});
-
-const moon=new THREE.Mesh(geo,mat);
+const moon = new THREE.Mesh(
+new THREE.SphereGeometry(size,16,16),
+new THREE.MeshStandardMaterial({map:loader.load(tex.moon)})
+);
 
 moon.userData={
 planet:planeta,
 dist:dist,
-angle:Math.random()*Math.PI*2,
-vel:vel
+vel:vel,
+angle:Math.random()*Math.PI*2
 };
 
 scene.add(moon);
@@ -212,77 +189,19 @@ crearLuna(marte,16,0.01,1),
 
 crearLuna(jupiter,30,0.01,3),
 crearLuna(jupiter,40,0.008,2),
-crearLuna(jupiter,50,0.006,2),
 
 crearLuna(saturno,35,0.008,2),
-crearLuna(saturno,45,0.006,2),
-
-crearLuna(urano,22,0.005,1.5),
 
 crearLuna(neptuno,24,0.004,1.5)
 
 ];
 
-function crearOrbita(dist){
-
-const geo=new THREE.RingGeometry(dist-0.2,dist+0.2,128);
-
-const mat=new THREE.MeshBasicMaterial({
-color:0xffffff,
-transparent:true,
-opacity:0.15,
-side:THREE.DoubleSide
-});
-
-const ring=new THREE.Mesh(geo,mat);
-
-ring.rotation.x=Math.PI/2;
-
-scene.add(ring);
-
-}
-
-[
-140,200,270,340,460,560,660,760,900
-].forEach(crearOrbita);
-
-function cinturonAsteroides(){
-
-const g=new THREE.BufferGeometry();
-
-const v=[];
-
-for(let i=0;i<4000;i++){
-
-const dist=400+Math.random()*60;
-const angle=Math.random()*Math.PI*2;
-
-v.push(Math.cos(angle)*dist);
-v.push((Math.random()-0.5)*10);
-v.push(Math.sin(angle)*dist);
-
-}
-
-g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));
-
-const mat=new THREE.PointsMaterial({
-size:1.2
-});
-
-const belt=new THREE.Points(g,mat);
-
-scene.add(belt);
-
-}
-
-cinturonAsteroides();
-
-const controls=new THREE.PointerLockControls(camera,document.body);
-document.body.addEventListener('click',()=>controls.lock());
+const controls = new THREE.PointerLockControls(camera,document.body);
+document.body.addEventListener("click",()=>controls.lock());
 
 const move={f:false,b:false,l:false,r:false,u:false,d:false};
 
-document.addEventListener('keydown',e=>{
+document.addEventListener("keydown",e=>{
 if(e.code==="KeyW")move.f=true;
 if(e.code==="KeyS")move.b=true;
 if(e.code==="KeyA")move.l=true;
@@ -291,7 +210,7 @@ if(e.code==="KeyE")move.u=true;
 if(e.code==="KeyQ")move.d=true;
 });
 
-document.addEventListener('keyup',e=>{
+document.addEventListener("keyup",e=>{
 if(e.code==="KeyW")move.f=false;
 if(e.code==="KeyS")move.b=false;
 if(e.code==="KeyA")move.l=false;
@@ -300,7 +219,12 @@ if(e.code==="KeyE")move.u=false;
 if(e.code==="KeyQ")move.d=false;
 });
 
-function verPlaneta(p){
+let planetaActual=null;
+let aterrizado=false;
+
+function viajar(p){
+
+planetaActual=p;
 
 camera.position.set(
 p.position.x+40,
@@ -316,11 +240,39 @@ camera.position.set(0,300,900);
 
 }
 
+function aterrizar(){
+
+if(!planetaActual) return;
+
+camera.position.set(
+planetaActual.position.x,
+planetaActual.position.y+2,
+planetaActual.position.z
+);
+
+aterrizado=true;
+
+}
+
+function despegar(){
+
+if(!planetaActual) return;
+
+camera.position.set(
+planetaActual.position.x+50,
+planetaActual.position.y+30,
+planetaActual.position.z+50
+);
+
+aterrizado=false;
+
+}
+
 function animate(){
 
 requestAnimationFrame(animate);
 
-const speed=6;
+const speed = aterrizado ? 2 : 6;
 
 if(move.f)controls.moveForward(speed);
 if(move.b)controls.moveForward(-speed);
@@ -373,4 +325,3 @@ renderer.setSize(window.innerWidth,window.innerHeight);
 
 </body>
 </html>
-
