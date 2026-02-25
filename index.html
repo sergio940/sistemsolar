@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Sistema Solar 3D VIP</title>
+<title>Sistema Solar 3D Completo</title>
 <style>
 body{margin:0;overflow:hidden;background:black;font-family:Arial}
 #info{
@@ -10,32 +10,17 @@ body{margin:0;overflow:hidden;background:black;font-family:Arial}
   color:white;background:rgba(0,0,0,.6);
   padding:10px;border-radius:6px;z-index:2
 }
-#radar{
-  position:absolute;top:10px;right:10px;
-  width:250px;height:250px;
-  background:rgba(0,0,0,.6);
-  border:2px solid #0f0;
-  border-radius:50%;
-  z-index:3;
-  cursor:pointer;
-  transition: all 0.3s ease;
-}
-#radar.grande{
-  width:400px;height:400px;
-}
-#radarInfo{
-  position:absolute;top:270px;right:10px;
+#cercano{
+  position:absolute;top:50px;left:10px;
   color:#0f0;background:rgba(0,0,0,.6);
-  padding:6px;border-radius:6px;font-size:12px;z-index:3;
-  max-width:400px;
+  padding:6px;border-radius:6px;font-size:14px;z-index:2;
 }
 </style>
 </head>
 <body>
 
 <div id="info">WASD mover · Ratón mirar · Q/E subir/bajar</div>
-<canvas id="radar"></canvas>
-<div id="radarInfo">Cerca de: —</div>
+<div id="cercano">Cerca de: —</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
@@ -61,7 +46,7 @@ const textures = {
   Marte:"https://i.postimg.cc/x8S1LKp4/marte-textura.png",
   Júpiter:"https://i.postimg.cc/W3mvLxSq/jupiter_textura.png",
   Saturno:"https://i.postimg.cc/T1Wn3qLQ/saturno.png",
-  AnillosSaturno:"https://i.postimg.cc/SNXStZ8C/aros.png",
+  AnillosSaturno:"https://i.postimg.cc/156xqbwY/anillos2.png",
   Urano:"https://i.postimg.cc/dVFNgDp8/urano.png",
   Neptuno:"https://i.postimg.cc/HxFBzLb0/neptuno.png",
   Pluton:"https://i.postimg.cc/sDBswhc5/pluton.png",
@@ -186,37 +171,20 @@ const move={f:false,b:false,l:false,r:false,u:false,d:false};
 document.addEventListener("keydown",e=>{if(e.code==="KeyW")move.f=true;if(e.code==="KeyS")move.b=true;if(e.code==="KeyA")move.l=true;if(e.code==="KeyD")move.r=true;if(e.code==="KeyE")move.u=true;if(e.code==="KeyQ")move.d=true;});
 document.addEventListener("keyup",e=>{if(e.code==="KeyW")move.f=false;if(e.code==="KeyS")move.b=false;if(e.code==="KeyA")move.l=false;if(e.code==="KeyD")move.r=false;if(e.code==="KeyE")move.u=false;if(e.code==="KeyQ")move.d=false;});
 
-// ================= RADAR =================
-const radar = document.getElementById("radar");
-const ctx = radar.getContext("2d");
-const radarInfo = document.getElementById("radarInfo");
-let radarGrande = false;
-radar.addEventListener("click",()=>{radarGrande=!radarGrande; radar.classList.toggle("grande");});
-
-function dibujarRadar(){
-  const r = radarGrande ? 200 : 120;
-  const cx = radarGrande ? 200 : 125;
-  const cy = radarGrande ? 200 : 125;
-  ctx.clearRect(0,0,radar.width,radar.height);
-
-  // círculo exterior
-  ctx.strokeStyle="#0f0"; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
-
-  // órbitas planetas
-  ctx.strokeStyle="rgba(0,255,0,0.3)";
-  [mercurio,venus,tierra,marte,jupiter,saturno,urano,neptuno,pluton].forEach(p=>{
-    ctx.beginPath();ctx.arc(cx,cy,p.userData.distancia*0.08,0,Math.PI*2);ctx.stroke();
-  });
-
-  // jugador
-  ctx.fillStyle="#00ff00"; ctx.fillRect(cx-2,cy-2,4,4);
-
-  let masCercano="—"; let minDist=Infinity;
-  function plot(obj,color){const x=cx+obj.position.x*0.08;const y=cy+obj.position.z*0.08;ctx.fillStyle=color;ctx.fillRect(x,y,3,3);const d=camera.position.distanceTo(obj.position);if(d<minDist){minDist=d;masCercano=obj.userData.nombre;}}
+// ================= PLANETA MÁS CERCANO =================
+const cercanoDiv = document.getElementById("cercano");
+function actualizarCercano(){
   const todos=[mercurio,venus,tierra,marte,jupiter,saturno,urano,neptuno,pluton];
-  todos.forEach(p=>{plot(p,"white"); p.userData.lunas.forEach(l=>plot(l,"lightblue"));});
-
-  radarInfo.textContent = `Cerca de: ${masCercano} | Pos X:${Math.round(camera.position.x)} Y:${Math.round(camera.position.y)} Z:${Math.round(camera.position.z)}`;
+  let masCercano = {nombre:"—", dist:Infinity};
+  todos.forEach(p=>{
+    const d = camera.position.distanceTo(p.position);
+    if(d < masCercano.dist){ masCercano = {nombre:p.userData.nombre, dist:d}; }
+    p.userData.lunas.forEach(l=>{
+      const dl = camera.position.distanceTo(l.position);
+      if(dl < masCercano.dist){ masCercano = {nombre:l.userData.nombre, dist:dl}; }
+    });
+  });
+  cercanoDiv.textContent = `Cerca de: ${masCercano.nombre}`;
 }
 
 // ================= ANIMACIÓN =================
@@ -236,7 +204,6 @@ function animate(){
     p.position.x=Math.cos(p.userData.angulo)*p.userData.distancia;
     p.position.z=Math.sin(p.userData.angulo)*p.userData.distancia;
     p.rotation.y+=p.userData.velRot;
-
     p.userData.lunas.forEach(l=>{
       l.userData.angulo+=l.userData.velocidad;
       l.position.x = p.position.x + Math.cos(l.userData.angulo)*l.userData.distancia;
@@ -247,7 +214,7 @@ function animate(){
   // anillo saturno
   ringSat.position.copy(saturno.position);
 
-  dibujarRadar();
+  actualizarCercano();
   renderer.render(scene,camera);
 }
 animate();
@@ -257,4 +224,3 @@ addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updat
 </script>
 </body>
 </html>
-
