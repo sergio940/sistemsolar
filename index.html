@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Sistema Solar 3D Realista PRO</title>
+<title>Sistema Solar 3D Realista PRO + Anillos</title>
 <style>
 body{margin:0;overflow:hidden;background:black;font-family:Arial}
 #info{
@@ -27,7 +27,7 @@ body{margin:0;overflow:hidden;background:black;font-family:Arial}
 </head>
 <body>
 
-<div id="info">WASD mover · Ratón mirar · Q/E subir/bajar</div>
+<div id="info">WASD mover · Ratón mirar · Q/E subir/subir</div>
 <canvas id="radar"></canvas>
 <div id="radarInfo">Cerca de: —</div>
 
@@ -55,6 +55,7 @@ Tierra:"https://i.postimg.cc/wTp1NdS6/image.png",
 Marte:"https://i.postimg.cc/x8S1LKp4/marte-textura.png",
 Júpiter:"https://i.postimg.cc/W3mvLxSq/jupiter_textura.png",
 Saturno:"https://i.postimg.cc/T1Wn3qLQ/saturno.png",
+AnillosSaturno:"https://i.postimg.cc/ZRkKr60v/anillos.png",
 Urano:"https://i.postimg.cc/dVFNgDp8/urano.png",
 Neptuno:"https://i.postimg.cc/HxFBzLb0/neptuno.png",
 Pluton:"https://i.postimg.cc/sDBswhc5/pluton.png",
@@ -149,13 +150,16 @@ return l;
 }
 const lunaTierra=crearLuna(tierra,14,.01);
 
-// ================= ANILLO SATURNO =================
-const ringSaturno=new THREE.Mesh(
-new THREE.RingGeometry(18,26,128),
-new THREE.MeshBasicMaterial({color:0xffffcc,side:THREE.DoubleSide,transparent:true,opacity:.7})
-);
-ringSaturno.rotation.x=Math.PI/2;
-ringSaturno.rotation.z=.45;
+// ================= ANILLO SATURNO CON TEXTURA =================
+const ringSaturnoGeometry = new THREE.RingGeometry(18,26,128);
+const ringSaturnoMaterial = new THREE.MeshBasicMaterial({
+map: loader.load(textures.AnillosSaturno),
+side: THREE.DoubleSide,
+transparent: true
+});
+const ringSaturno = new THREE.Mesh(ringSaturnoGeometry, ringSaturnoMaterial);
+ringSaturno.rotation.x = Math.PI/2;
+ringSaturno.rotation.z = .45;
 scene.add(ringSaturno);
 
 // ================= CINTURÓN ASTEROIDES =================
@@ -207,7 +211,6 @@ const naves=[voyager1,voyager2];
 // ================= CONTROLES =================
 const controls=new THREE.PointerLockControls(camera,document.body);
 document.body.addEventListener("click",()=>controls.lock());
-
 const move={f:false,b:false,l:false,r:false,u:false,d:false};
 document.addEventListener("keydown",e=>{
 if(e.code==="KeyW")move.f=true;
@@ -237,8 +240,6 @@ ctx.strokeStyle="#0f0";
 ctx.beginPath();
 ctx.arc(100,100,95,0,Math.PI*2);
 ctx.stroke();
-
-// jugador
 ctx.fillStyle="#00ff00";
 ctx.fillRect(98,98,4,4);
 
@@ -249,10 +250,8 @@ function plot(obj,color){
 const scale=.08;
 const x=100+obj.position.x*scale;
 const y=100+obj.position.z*scale;
-
 ctx.fillStyle=color;
 ctx.fillRect(x,y,3,3);
-
 const d=camera.position.distanceTo(obj.position);
 if(d<minDist){minDist=d;masCercano=obj.userData.nombre;}
 }
