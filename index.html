@@ -163,7 +163,7 @@ scene.add(ringSat);
 // ================= CINTURÓN DE ASTEROIDES ENTRE NEPTUNO Y PLUTÓN =================
 (function(){
   const asteroidesGroup = new THREE.Group();
-  const numAst = 2500;
+  const numAst = 5000;
   for(let i=0; i<numAst; i++){
     const radio = Math.random()*1 + 0.3;
     const geo = new THREE.IcosahedronGeometry(radio, 0);
@@ -277,6 +277,7 @@ addEventListener("resize",()=>{
 </script>
 </body>
 </html>
+
 
 
 
