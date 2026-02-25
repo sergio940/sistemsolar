@@ -65,14 +65,14 @@ scene.add(sunLight);
 
 // ================= SOL =================
 const sun = new THREE.Mesh(
-  new THREE.SphereGeometry(60,64,64),
+  new THREE.SphereGeometry(120, 64, 64), // 60 → 120
   new THREE.MeshBasicMaterial({map: loader.load(textures.Sol)})
 );
 scene.add(sun);
 
 const glowTexture = loader.load("https://threejs.org/examples/textures/lensflare/lensflare0.png");
 const glow = new THREE.Sprite(new THREE.SpriteMaterial({map: glowTexture, color:0xffddaa, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false}));
-glow.scale.set(500,500,1);
+camera.position.set(0, 500, 3000); // antes era 2000
 sun.add(glow);
 
 // ================= ESTRELLAS =================
@@ -277,6 +277,7 @@ addEventListener("resize",()=>{
 </script>
 </body>
 </html>
+
 
 
 
