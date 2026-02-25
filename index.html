@@ -77,18 +77,24 @@ new THREE.MeshBasicMaterial({map:loader.load(textures.Sol)})
 );
 scene.add(sun);
 
-// ===== GLOW DEL SOL =====
+// ===== GLOW DEL SOL CORREGIDO (SIN CUADRADO) =====
+const glowTexture=new THREE.TextureLoader().load(
+"https://threejs.org/examples/textures/lensflare/lensflare0.png"
+);
+
 const glowMat=new THREE.SpriteMaterial({
-map:loader.load(textures.Sol),
+map:glowTexture,
 color:0xffddaa,
 transparent:true,
-blending:THREE.AdditiveBlending
+blending:THREE.AdditiveBlending,
+depthWrite:false
 });
+
 const glow=new THREE.Sprite(glowMat);
-glow.scale.set(400,400,1);
+glow.scale.set(500,500,1);
 sun.add(glow);
 
-// ================= ESTRELLAS REALISTAS =================
+// ================= ESTRELLAS =================
 (function(){
 const g=new THREE.BufferGeometry();
 const v=[];
