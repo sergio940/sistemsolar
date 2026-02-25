@@ -64,17 +64,31 @@ const sunLight = new THREE.PointLight(0xffffff, 3, 0);
 scene.add(sunLight);
 
 // ================= SOL =================
+const sunRadius = 120; // tamaño del Sol
 const sun = new THREE.Mesh(
-  new THREE.SphereGeometry(120, 64, 64), // 60 → 120
+  new THREE.SphereGeometry(sunRadius, 64, 64),
   new THREE.MeshBasicMaterial({map: loader.load(textures.Sol)})
 );
 scene.add(sun);
 
+// ================= GLOW =================
 const glowTexture = loader.load("https://threejs.org/examples/textures/lensflare/lensflare0.png");
-const glow = new THREE.Sprite(new THREE.SpriteMaterial({map: glowTexture, color:0xffddaa, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false}));
-camera.position.set(0, 500, 3000); // antes era 2000
+const glowMat = new THREE.SpriteMaterial({
+  map: glowTexture,
+  color: 0xffddaa,
+  transparent: true,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false
+});
+const glow = new THREE.Sprite(glowMat);
+
+// Escala del glow proporcional al radio del Sol
+glow.scale.set(sunRadius*8, sunRadius*8, 1); 
+glow.position.set(0, 0, 0); // centrado en el Sol
 sun.add(glow);
 
+// ================= AJUSTE DE CÁMARA =================
+camera.position.set(0, 500, sunRadius*25); // ajusta distancia para verlo bien
 // ================= ESTRELLAS =================
 (function(){
   const g = new THREE.BufferGeometry();
@@ -277,6 +291,7 @@ addEventListener("resize",()=>{
 </script>
 </body>
 </html>
+
 
 
 
