@@ -10,13 +10,6 @@ body{margin:0;overflow:hidden;background:black;font-family:Arial}
   color:white;background:rgba(0,0,0,.6);
   padding:10px;border-radius:6px;z-index:2
 }
-#menuPlanetas{
-  position:absolute;top:60px;left:10px;
-  color:white;background:rgba(0,0,0,.6);
-  padding:10px;border-radius:6px;z-index:2;
-  max-height:90vh;overflow:auto
-}
-button{margin:3px;cursor:pointer}
 #radar{
   position:absolute;top:10px;right:10px;
   width:200px;height:200px;
@@ -34,21 +27,7 @@ button{margin:3px;cursor:pointer}
 </head>
 <body>
 
-<div id="info">WASD mover · Ratón mirar · Q/E bajar/subir</div>
-
-<div id="menuPlanetas">
-<button onclick="irSistemaSolar()">Sistema completo</button><br>
-<button onclick="irPlaneta(mercurio)">Mercurio</button>
-<button onclick="irPlaneta(venus)">Venus</button>
-<button onclick="irPlaneta(tierra)">Tierra</button>
-<button onclick="irPlaneta(marte)">Marte</button>
-<button onclick="irPlaneta(jupiter)">Júpiter</button>
-<button onclick="irPlaneta(saturno)">Saturno</button>
-<button onclick="irPlaneta(urano)">Urano</button>
-<button onclick="irPlaneta(neptuno)">Neptuno</button>
-<button onclick="irPlaneta(pluton)">Plutón</button>
-</div>
-
+<div id="info">WASD mover · Ratón mirar · Q/E subir/bajar</div>
 <canvas id="radar"></canvas>
 <div id="radarInfo">Cerca de: —</div>
 
@@ -78,7 +57,7 @@ Júpiter:"https://i.postimg.cc/W3mvLxSq/jupiter_textura.png",
 Saturno:"https://i.postimg.cc/T1Wn3qLQ/saturno.png",
 Urano:"https://i.postimg.cc/dVFNgDp8/urano.png",
 Neptuno:"https://i.postimg.cc/HxFBzLb0/neptuno.png",
-Pluton:"https://i.postimg.cc/9QnVjPVX/pluton.png",
+Pluton:"https://i.postimg.cc/sDBswhc5/pluton.png",
 Luna:"https://i.postimg.cc/7hfrGbwg/luna.png"
 };
 
@@ -246,12 +225,6 @@ if(e.code==="KeyD")move.r=false;
 if(e.code==="KeyE")move.u=false;
 if(e.code==="KeyQ")move.d=false;
 });
-
-// ================= BOTONES =================
-function irPlaneta(p){
-camera.position.set(p.position.x,p.position.y+20,p.position.z+p.userData.distancia*.5);
-}
-function irSistemaSolar(){camera.position.set(0,250,900);}
 
 // ================= RADAR =================
 const radar=document.getElementById("radar");
