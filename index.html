@@ -160,6 +160,40 @@ ringSat.rotation.x = Math.PI/2 + 0.3;
 ringSat.rotation.z = 0.45;
 scene.add(ringSat);
 
+// ================= CINTURÓN DE ASTEROIDES ENTRE NEPTUNO Y PLUTÓN =================
+(function(){
+  const asteroidesGroup = new THREE.Group();
+  const numAst = 1500;
+  for(let i=0; i<numAst; i++){
+    const radio = Math.random()*1 + 0.3;
+    const geo = new THREE.IcosahedronGeometry(radio, 0);
+    const mat = new THREE.MeshStandardMaterial({color:0x888888});
+    const ast = new THREE.Mesh(geo, mat);
+
+    const ang = Math.random()*Math.PI*2;
+    const dist = 2400 + Math.random()*200;
+    const yPos = THREE.MathUtils.randFloatSpread(40);
+    ast.position.set(Math.cos(ang)*dist, yPos, Math.sin(ang)*dist);
+
+    asteroidesGroup.add(ast);
+  }
+  scene.add(asteroidesGroup);
+
+  function animAsteroides(){
+    asteroidesGroup.children.forEach(a=>{
+      const angVel = 0.00001 + Math.random()*0.00001;
+      const x = a.position.x;
+      const z = a.position.z;
+      const dist = Math.sqrt(x*x + z*z);
+      const ang = Math.atan2(z, x) + angVel;
+      a.position.x = Math.cos(ang)*dist;
+      a.position.z = Math.sin(ang)*dist;
+    });
+    requestAnimationFrame(animAsteroides);
+  }
+  animAsteroides();
+})();
+
 // ================= CONTROLES =================
 const controls = new THREE.PointerLockControls(camera, document.body);
 document.body.addEventListener("click", ()=>controls.lock());
