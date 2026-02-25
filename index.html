@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Sistema Solar 3D SUP</title>
+<title>Sistema Solar 3D VIP</title>
 <style>
 body{margin:0;overflow:hidden;background:black;font-family:Arial}
 #info{
@@ -61,7 +61,7 @@ const textures = {
   Marte:"https://i.postimg.cc/x8S1LKp4/marte-textura.png",
   Júpiter:"https://i.postimg.cc/W3mvLxSq/jupiter_textura.png",
   Saturno:"https://i.postimg.cc/T1Wn3qLQ/saturno.png",
-  AnillosSaturno:"https://i.postimg.cc/SNXStZ8C/aros.png",
+  AnillosSaturno:"https://i.postimg.cc/156xqbwY/anillos2.png",
   Urano:"https://i.postimg.cc/dVFNgDp8/urano.png",
   Neptuno:"https://i.postimg.cc/HxFBzLb0/neptuno.png",
   Pluton:"https://i.postimg.cc/sDBswhc5/pluton.png",
@@ -81,7 +81,7 @@ scene.add(sun);
 
 // Glow
 const glowTexture = loader.load("https://threejs.org/examples/textures/lensflare/lensflare0.png");
-const glow = new THREE.Sprite(new THREE.SpriteMaterial({map: glowTexture, color: 0xffddaa, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false}));
+const glow = new THREE.Sprite(new THREE.SpriteMaterial({map: glowTexture, color:0xffddaa, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false}));
 glow.scale.set(500,500,1);
 sun.add(glow);
 
@@ -144,34 +144,28 @@ function crearLuna(planeta,dist,vel,nombre){
 
 // Tierra
 crearLuna(tierra,14,0.01,"Luna");
-
 // Marte
 crearLuna(marte,6,0.008,"Fobos");
 crearLuna(marte,10,0.006,"Deimos");
-
 // Júpiter
 crearLuna(jupiter,22,0.006,"Io");
 crearLuna(jupiter,28,0.005,"Europa");
 crearLuna(jupiter,34,0.004,"Ganimedes");
 crearLuna(jupiter,40,0.003,"Calisto");
-
 // Saturno
 crearLuna(saturno,22,0.004,"Titán");
 crearLuna(saturno,28,0.0035,"Rea");
 crearLuna(saturno,34,0.003,"Jápeto");
 crearLuna(saturno,40,0.0025,"Dione");
-
 // Urano
 crearLuna(urano,18,0.003,"Miranda");
 crearLuna(urano,22,0.0028,"Ariel");
 crearLuna(urano,26,0.0025,"Umbriel");
 crearLuna(urano,30,0.0022,"Titania");
 crearLuna(urano,34,0.002,"Oberón");
-
 // Neptuno
 crearLuna(neptuno,18,0.0025,"Tritón");
 crearLuna(neptuno,24,0.0022,"Nereida");
-
 // Plutón
 crearLuna(pluton,8,0.0018,"Caronte");
 crearLuna(pluton,12,0.0015,"Nix");
@@ -210,7 +204,9 @@ function dibujarRadar(){
 
   // órbitas planetas
   ctx.strokeStyle="rgba(0,255,0,0.3)";
-  [mercurio,venus,tierra,marte,jupiter,saturno,urano,neptuno,pluton].forEach(p=>{ctx.beginPath();ctx.arc(cx,cy,p.userData.distancia*0.08,0,Math.PI*2);ctx.stroke();});
+  [mercurio,venus,tierra,marte,jupiter,saturno,urano,neptuno,pluton].forEach(p=>{
+    ctx.beginPath();ctx.arc(cx,cy,p.userData.distancia*0.08,0,Math.PI*2);ctx.stroke();
+  });
 
   // jugador
   ctx.fillStyle="#00ff00"; ctx.fillRect(cx-2,cy-2,4,4);
@@ -219,7 +215,6 @@ function dibujarRadar(){
   function plot(obj,color){const x=cx+obj.position.x*0.08;const y=cy+obj.position.z*0.08;ctx.fillStyle=color;ctx.fillRect(x,y,3,3);const d=camera.position.distanceTo(obj.position);if(d<minDist){minDist=d;masCercano=obj.userData.nombre;}}
   const todos=[mercurio,venus,tierra,marte,jupiter,saturno,urano,neptuno,pluton];
   todos.forEach(p=>{plot(p,"white"); p.userData.lunas.forEach(l=>plot(l,"lightblue"));});
-  [sun, voyager1, voyager2].forEach(p=>plot(p,"cyan"));
 
   radarInfo.textContent = `Cerca de: ${masCercano} | Pos X:${Math.round(camera.position.x)} Y:${Math.round(camera.position.y)} Z:${Math.round(camera.position.z)}`;
 }
@@ -235,14 +230,13 @@ function animate(){
   if(move.u)camera.position.y+=s;
   if(move.d)camera.position.y-=s;
 
-  // órbitas planetas
+  // órbitas planetas y lunas
   [mercurio,venus,tierra,marte,jupiter,saturno,urano,neptuno,pluton].forEach(p=>{
     p.userData.angulo+=p.userData.velOrb;
     p.position.x=Math.cos(p.userData.angulo)*p.userData.distancia;
     p.position.z=Math.sin(p.userData.angulo)*p.userData.distancia;
     p.rotation.y+=p.userData.velRot;
 
-    // lunas
     p.userData.lunas.forEach(l=>{
       l.userData.angulo+=l.userData.velocidad;
       l.position.x = p.position.x + Math.cos(l.userData.angulo)*l.userData.distancia;
@@ -252,9 +246,6 @@ function animate(){
 
   // anillo saturno
   ringSat.position.copy(saturno.position);
-
-  // voyager
-  [voyager1, voyager2].forEach(v=>{v.userData.angulo+=v.userData.vel; v.position.x=Math.cos(v.userData.angulo)*v.userData.distancia; v.position.z=Math.sin(v.userData.angulo)*v.userData.distancia;});
 
   dibujarRadar();
   renderer.render(scene,camera);
