@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Sistema Solar UO - Voyagers</title>
+<title>Sistem solar UO</title>
 <style>
 body{margin:0;overflow:hidden;background:black;font-family:Arial}
 #info{
@@ -20,11 +20,6 @@ body{margin:0;overflow:hidden;background:black;font-family:Arial}
   color:white;background:rgba(0,0,0,.6);
   padding:6px;border-radius:6px;font-size:14px;z-index:2;
 }
-#voyagerPanel{
-  position:absolute;top:10px;right:10px;
-  color:#0af;background:rgba(0,0,0,.6);
-  padding:8px;border-radius:6px;z-index:2;font-size:12px
-}
 </style>
 </head>
 <body>
@@ -32,13 +27,12 @@ body{margin:0;overflow:hidden;background:black;font-family:Arial}
 <div id="info">WASD mover · Ratón mirar · Q/E subir/bajar</div>
 <div id="cercano">Cerca de: —</div>
 <div id="velControl">Velocidad: <span id="velocidadText">10</span></div>
-<div id="voyagerPanel">🛰️ Voyagers activas<br><small>V: cambiar foco</small></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
 
 <script>
-// ================= ESCENA (ORIGINAL) =================
+// ================= ESCENA =================
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 50000);
 camera.position.set(0, 500, 2000);
@@ -48,7 +42,7 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
-// ================= TEXTURAS (ORIGINAL - URLs exactas) =================
+// ================= TEXTURAS =================
 const loader = new THREE.TextureLoader();
 const textures = {
   Sol:"https://i.postimg.cc/zGW5FLW0/sol.png  ",
@@ -65,11 +59,11 @@ const textures = {
   Luna:"https://i.postimg.cc/7hfrGbwg/luna.png  "
 };
 
-// ================= LUZ (ORIGINAL) =================
+// ================= LUZ =================
 const sunLight = new THREE.PointLight(0xffffff, 3, 0);
 scene.add(sunLight);
 
-// ================= SOL (ORIGINAL) =================
+// ================= SOL =================
 const sunRadius = 120;
 const sun = new THREE.Mesh(
   new THREE.SphereGeometry(sunRadius, 64, 64),
@@ -77,7 +71,7 @@ const sun = new THREE.Mesh(
 );
 scene.add(sun);
 
-// ================= GLOW (ORIGINAL) =================
+// ================= GLOW =================
 const glowTexture = loader.load("https://threejs.org/examples/textures/lensflare/lensflare0.png  ");
 const glowMat = new THREE.SpriteMaterial({
   map: glowTexture,
@@ -91,10 +85,10 @@ glow.scale.set(sunRadius*8, sunRadius*8, 1);
 glow.position.set(0, 0, 0);
 sun.add(glow);
 
-// ================= AJUSTE DE CÁMARA (ORIGINAL) =================
+// ================= AJUSTE DE CÁMARA =================
 camera.position.set(0, 500, sunRadius*25);
 
-// ================= ESTRELLAS (ORIGINAL) =================
+// ================= ESTRELLAS =================
 (function(){
   const g = new THREE.BufferGeometry();
   const v = [];
@@ -108,7 +102,7 @@ camera.position.set(0, 500, sunRadius*25);
   scene.add(new THREE.Points(g, new THREE.PointsMaterial({size:1})));
 })();
 
-// ================= CREAR PLANETA (ORIGINAL) =================
+// ================= CREAR PLANETA =================
 function crearPlaneta(nombre,opt){
   const mesh = new THREE.Mesh(
     new THREE.SphereGeometry(opt.radio,48,48),
@@ -127,7 +121,7 @@ function crearPlaneta(nombre,opt){
   return mesh;
 }
 
-// ================= PLANETAS (ORIGINAL) =================
+// ================= PLANETAS =================
 const mercurio = crearPlaneta("Mercurio",{radio:4,distancia:400,velOrb:.00003,velRot:.001,inclinacion:7});
 const venus    = crearPlaneta("Venus",{radio:7,distancia:600,velOrb:.000025,velRot:.0008,inclinacion:3});
 const tierra   = crearPlaneta("Tierra",{radio:8,distancia:800,velOrb:.00002,velRot:.001,inclinacion:0});
@@ -138,7 +132,7 @@ const urano    = crearPlaneta("Urano",{radio:13,distancia:1900,velOrb:.00001,vel
 const neptuno  = crearPlaneta("Neptuno",{radio:13,distancia:2200,velOrb:.000008,velRot:.001,inclinacion:1.77});
 const pluton = crearPlaneta("Pluton",{radio:6,distancia:3000,velOrb:.000006,velRot:.0007,inclinacion:17});
 
-// ================= CREAR LUNAS (ORIGINAL) =================
+// ================= CREAR LUNAS =================
 function crearLuna(planeta,dist,vel,nombre){
   const l = new THREE.Mesh(new THREE.SphereGeometry(2,24,24),
         new THREE.MeshStandardMaterial({map:loader.load(textures.Luna)}));
@@ -148,7 +142,7 @@ function crearLuna(planeta,dist,vel,nombre){
   return l;
 }
 
-// Lunas principales (ORIGINAL)
+// Lunas principales
 crearLuna(tierra,14,0.01,"Luna");
 crearLuna(marte,6,0.008,"Fobos");
 crearLuna(marte,10,0.006,"Deimos");
@@ -171,7 +165,7 @@ crearLuna(pluton,8,0.0018,"Caronte");
 crearLuna(pluton,12,0.0015,"Nix");
 crearLuna(pluton,16,0.0013,"Hidra");
 
-// ================= ANILLOS SATURNO (ORIGINAL) =================
+// ================= ANILLOS SATURNO =================
 const ringSatGeo = new THREE.RingGeometry(18, 50, 128);
 const ringSatMat = new THREE.MeshBasicMaterial({map:loader.load(textures.AnillosSaturno), side:THREE.DoubleSide, transparent:true});
 const ringSat = new THREE.Mesh(ringSatGeo, ringSatMat);
@@ -179,7 +173,7 @@ ringSat.rotation.x = Math.PI/2 + 0.3;
 ringSat.rotation.z = 0.45;
 scene.add(ringSat);
 
-// ================= CINTURÓN DE ASTEROIDES (ORIGINAL) =================
+// ================= CINTURÓN DE ASTEROIDES =================
 (function(){
   const asteroidesGroup = new THREE.Group();
   const numAst = 5000;
@@ -210,37 +204,24 @@ scene.add(ringSat);
   animAsteroides();
 })();
 
-// ============== ✨ AÑADIDO: VOYAGERS ✨ ==============
-// Voyager 1 - esfera naranja con estela
-const v1Geo = new THREE.SphereGeometry(1.5, 16, 16);
-const v1Mat = new THREE.MeshBasicMaterial({color: 0xffaa44});
-const voyager1 = new THREE.Mesh(v1Geo, v1Mat);
+// ================= VOYAGERS =================
+const voyager1 = new THREE.Mesh(
+  new THREE.SphereGeometry(1.5, 16, 16),
+  new THREE.MeshBasicMaterial({color: 0xffaa44})
+);
 voyager1.position.set(800, 100, 0);
-voyager1.userData = {nombre: "Voyager 1", velocidad: 0.15, direccion: new THREE.Vector3(0.4, 0.6, 0.3).normalize(), estela: []};
+voyager1.userData = {direccion: new THREE.Vector3(0.4, 0.6, 0.3).normalize(), velocidad: 0.15};
 scene.add(voyager1);
 
-// Voyager 2 - esfera azul con estela
-const v2Geo = new THREE.SphereGeometry(1.5, 16, 16);
-const v2Mat = new THREE.MeshBasicMaterial({color: 0x44aaff});
-const voyager2 = new THREE.Mesh(v2Geo, v2Mat);
+const voyager2 = new THREE.Mesh(
+  new THREE.SphereGeometry(1.5, 16, 16),
+  new THREE.MeshBasicMaterial({color: 0x44aaff})
+);
 voyager2.position.set(-600, -50, 300);
-voyager2.userData = {nombre: "Voyager 2", velocidad: 0.12, direccion: new THREE.Vector3(-0.5, 0.3, -0.6).normalize(), estela: []};
+voyager2.userData = {direccion: new THREE.Vector3(-0.5, 0.3, -0.6).normalize(), velocidad: 0.12};
 scene.add(voyager2);
 
-// Función para actualizar Voyagers
-function actualizarVoyagers(){
-  [voyager1, voyager2].forEach(v => {
-    // Mover en línea recta con ligera desviación
-    v.position.add(v.userData.direccion.clone().multiplyScalar(v.userData.velocidad));
-    
-    // Guardar posición para la estela
-    v.userData.estela.push(v.position.clone());
-    if(v.userData.estela.length > 30) v.userData.estela.shift();
-  });
-}
-// ============== ✨ FIN VOYAGERS ✨ ==============
-
-// ================= CONTROLES (ORIGINAL) =================
+// ================= CONTROLES =================
 const controls = new THREE.PointerLockControls(camera, document.body);
 document.body.addEventListener("click", ()=>controls.lock());
 const move={f:false,b:false,l:false,r:false,u:false,d:false};
@@ -268,7 +249,7 @@ document.addEventListener("keyup", e=>{
   if(e.code==="KeyQ")move.d=false;
 });
 
-// ================= PLANETA MÁS CERCANO (ORIGINAL) =================
+// ================= PLANETA MÁS CERCANO =================
 const cercanoDiv = document.getElementById("cercano");
 function actualizarCercano(){
   const todos=[mercurio,venus,tierra,marte,jupiter,saturno,urano,neptuno,pluton];
@@ -284,7 +265,7 @@ function actualizarCercano(){
   cercanoDiv.textContent = `Cerca de: ${masCercano.nombre}`;
 }
 
-// ================= ANIMACIÓN (ORIGINAL + VOYAGERS) =================
+// ================= ANIMACIÓN =================
 function animate(){
   requestAnimationFrame(animate);
 
@@ -310,15 +291,15 @@ function animate(){
 
   ringSat.position.copy(saturno.position);
   
-  // ✨ Actualizar Voyagers
-  actualizarVoyagers();
+  voyager1.position.add(voyager1.userData.direccion.clone().multiplyScalar(voyager1.userData.velocidad));
+  voyager2.position.add(voyager2.userData.direccion.clone().multiplyScalar(voyager2.userData.velocidad));
   
   actualizarCercano();
   renderer.render(scene,camera);
 }
 animate();
 
-// ================= RESIZE (ORIGINAL) =================
+// ================= RESIZE =================
 addEventListener("resize",()=>{
   camera.aspect = innerWidth/innerHeight;
   camera.updateProjectionMatrix();
